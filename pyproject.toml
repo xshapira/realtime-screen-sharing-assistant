@@ -1,0 +1,44 @@
+[project]
+name = "realtime-screen-sharing-assistant"
+version = "2025.0.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["google-genai==0.3.0", "google-generativeai==0.8.3"]
+
+[tool.uv]
+dev-dependencies = [
+  "ruff>=0.9.1",
+  "basedpyright>=1.23.2",
+  "pre-commit>=4.0.1",
+  "snoop>=0.6.0",
+]
+
+[tool.basedpyright]
+typeCheckingMode = "recommended"
+
+[tool.ruff]
+line-length = 88
+exclude = ['.git', '__pycache__', '__init__.py', '.mypy_cache', '.pytest_cache']
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = [
+  "E",  # pycodestyle errors
+  "W",  # pycodestyle warnings
+  "F",  # pyflakes
+  "I",  # isort
+  "C4", # flake8-comprehensions
+  "B",  # flake8-bugbear
+  "UP", # pyupgrade
+]
+ignore = [
+  "E501", # line too long
+  "C901", # Comprehension is too complex (11 > 10)
+  "W191", # indentation contains tabs
+]
+unfixable = ["F841"]
+
+[tool.ruff.lint.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true
