@@ -11,6 +11,7 @@ import google.generativeai as generative
 import websockets
 from google import genai
 from pydub import AudioSegment
+from websockets.protocol import Protocol
 
 from config import config
 from logger import setup_logger
@@ -24,9 +25,10 @@ generative.configure(api_key=API_KEY)  # pyright: ignore[reportAttributeAccessIs
 log = setup_logger(__name__)
 
 client = genai.Client(
+    api_key="",
     http_options={
         "api_version": "v1alpha",
-    }
+    },
 )
 
 
@@ -34,7 +36,7 @@ client = genai.Client(
 class GeminiSession:
     """Holds session state and data"""
 
-    websocket: websockets.WebSocketServerProtocol
+    websocket: Protocol
     session: Any
     audio_data: bytearray = bytearray()
 
@@ -66,9 +68,7 @@ async def handle_client_message(session: Any, message: str) -> None:
         log.error(f"Error processing client message: {exc}")
 
 
-async def send_to_client(
-    websocket: websockets.WebSocketServerProtocol, data: dict
-) -> None:
+async def send_to_client(websocket: Protocol, data: dict) -> None:
     """Send formatted data to the client."""
     try:
         await websocket.send(json.dumps(data))
@@ -131,7 +131,7 @@ async def gemini_to_client_loop(gemini_session: GeminiSession) -> None:
 
 
 async def gemini_session_handler(
-    client_websocket: websockets.WebSocketServerProtocol,
+    client_websocket: Protocol,
 ) -> None:
     send_task = None
     receive_task = None
