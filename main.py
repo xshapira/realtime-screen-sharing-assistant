@@ -4,7 +4,7 @@ import contextlib
 import io
 import json
 import wave
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import google.generativeai as generative
@@ -38,7 +38,7 @@ class GeminiSession:
 
     websocket: Protocol
     session: Any
-    audio_data: bytearray = bytearray()
+    audio_data: bytearray = field(default_factory=bytearray)
 
 
 async def process_media_chunk(session: Any, chunk: dict) -> None:
