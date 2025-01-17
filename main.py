@@ -20,9 +20,15 @@ API_KEY = config.GOOGLE_API_KEY
 MODEL = "gemini-2.0-flash-exp"
 TRANSCRIPTION_MODEL = "gemini-1.5-flash-8b"
 
-generative.configure(api_key=API_KEY)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
+generative.configure(api_key="")  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
+
 
 log = setup_logger(__name__)
+
+# model_list = list(generative.list_models())
+# for model in model_list:
+#     log.info(model.name)
+
 
 client = genai.Client(
     api_key="",
@@ -130,6 +136,22 @@ async def gemini_to_client_loop(gemini_session: GeminiSession) -> None:
         log.info("Gemini-to-client loop terminated")
 
 
+async def client_to_gemini_loop(gemini_session: GeminiSession) -> None:
+    """Handle messages from client to Gemini."""
+    try:
+        async for message in gemini_session.websocket:
+            # log.info(
+            #     f"Received message from client: {message[:100]}..."
+            # )  # log first 100 chars
+            await handle_client_message(gemini_session.session, message)
+    except websockets.exceptions.ConnectionClosedOK:
+        log.info("Client connection closed normally")
+    except Exception as exc:
+        log.error(f"Error in client-to-Gemini loop: {exc}")
+    finally:
+        log.info("Client-to-Gemini loop terminated")
+
+
 async def gemini_session_handler(
     client_websocket: Protocol,
 ) -> None:
@@ -137,6 +159,8 @@ async def gemini_session_handler(
     receive_task = None
 
     try:
+        message = await client_websocket.recv()
+        log.info(f"Received initial message: {message}")
         config_data = json.loads(await client_websocket.recv())
         config = config_data.get("setup", {})
 
@@ -149,7 +173,7 @@ async def gemini_session_handler(
             )
 
             send_task = asyncio.create_task(gemini_to_client_loop(gemini_session))
-            receive_task = asyncio.create_task(gemini_to_client_loop(gemini_session))
+            receive_task = asyncio.create_task(client_to_gemini_loop(gemini_session))
             await asyncio.gather(send_task, receive_task)
 
     except json.JSONDecodeError:
