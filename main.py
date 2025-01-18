@@ -161,8 +161,27 @@ async def gemini_session_handler(
     try:
         message = await client_websocket.recv()
         log.info(f"Received initial message: {message}")
-        config_data = json.loads(await client_websocket.recv())
-        config = config_data.get("setup", {})
+        config_data = json.loads(message)
+        default_config = {
+            "generation_config": {
+                "response_modalities": ["AUDIO", "TEXT"],
+                "language": "en",
+                "temperature": 0.7,
+                "candidate_count": 1,
+            },
+            "safety_settings": {
+                "harassment": "block_none",
+                "hate_speech": "block_none",
+                "sexually_explicit": "block_none",
+                "dangerous_content": "block_none",
+            },
+        }
+
+        # get setup config from client or use defaults
+        client_setup = config_data.get("setup", {})
+        config = {"setup": default_config | client_setup}
+
+        # log.info(f"Connecting to Gemini with config: {json.dumps(config, indent=2)}")
 
         async with client.aio.live.connect(model=MODEL, config=config) as session:
             log.info("Connected to Gemini API")
