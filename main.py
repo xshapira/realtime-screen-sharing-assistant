@@ -114,18 +114,19 @@ async def handle_model_turn(gemini_session: GeminiSession, model_turn: Any) -> N
 async def gemini_to_client_loop(gemini_session: GeminiSession) -> None:
     """Handle messages from Gemini to client."""
     try:
-        async for response in gemini_session.session.receive():
-            if not response.server_content:
-                log.warning(f"Unhandled server message: {response}")
-                continue
+        while True:
+            async for response in gemini_session.session.receive():
+                if not response.server_content:
+                    log.warning(f"Unhandled server message: {response}")
+                    continue
 
-            if response.server_content.model_turn:
-                await handle_model_turn(
-                    gemini_session, response.server_content.model_turn
-                )
+                if response.server_content.model_turn:
+                    await handle_model_turn(
+                        gemini_session, response.server_content.model_turn
+                    )
 
-            if response.server_content.turn_complete:
-                await handle_turn_complete(gemini_session)
+                if response.server_content.turn_complete:
+                    await handle_turn_complete(gemini_session)
 
     except websockets.exceptions.ConnectionClosedOK:
         log.info("Client connection closed normally")
