@@ -9,8 +9,8 @@ DOTENV_PROD = Path(BASE_DIR, "prod.env")
 
 
 class AppSettings(BaseSettings):
-    DEBUG: bool | None = False
-    GOOGLE_API_KEY: str | None = None
+    DEBUG: bool | None = True
+    GOOGLE_API_KEY: str = None
 
     model_config = SettingsConfigDict(case_sensitive=True, env_file=DOTENV)  # pyright: ignore[reportUnannotatedClassAttribute]
 

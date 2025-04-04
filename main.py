@@ -20,7 +20,7 @@ API_KEY = config.GOOGLE_API_KEY
 MODEL = "gemini-2.0-flash-exp"
 TRANSCRIPTION_MODEL = "gemini-1.5-flash-8b"
 
-generative.configure(api_key="")  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
+generative.configure(api_key=API_KEY)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType]
 
 
 log = setup_logger(__name__)
@@ -31,7 +31,7 @@ log = setup_logger(__name__)
 
 
 client = genai.Client(
-    api_key="",
+    api_key=API_KEY,
     http_options={
         "api_version": "v1alpha",
     },
